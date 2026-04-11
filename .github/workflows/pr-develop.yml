@@ -1,28 +1,32 @@
-name: CI PR Develop
+name: CI PR Develop .NET
 
 on:
   pull_request:
     branches:
       - develop
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
-  build-test:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Clonar repositorio
         uses: actions/checkout@v4
 
-      - name: Configurar Node
-        uses: actions/setup-node@v4
+      - name: Instalar .NET
+        uses: actions/setup-dotnet@v4
         with:
-          node-version: 20
+          dotnet-version: '8.0.x'
 
-      - name: Instalar dependencias
-        run: npm ci
+      - name: Restaurar dependencias
+        run: dotnet restore
 
-      - name: Ejecutar build
-        run: npm run build
+      - name: Compilar proyecto
+        run: dotnet build --no-restore --configuration Release
 
-      - name: Ejecutar test
-        run: npm test -- --watch=false
+      - name: Ejecutar pruebas
+        run: dotnet test --no-build --configuration Release --verbosity normal
